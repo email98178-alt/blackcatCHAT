@@ -648,64 +648,109 @@ html,body{
 }
 /* Estilo específico para o container do formulário de pagamento */
 .payment-form-container {
-  padding-top: 16px;
-  border-top: 1px dashed var(--border-2);
-  margin-top: 4px;
-  animation: slideDownFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-2);
+  margin-top: 14px;
+  animation: slideDownFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   display: none;
 }
 
 @keyframes slideDownFade {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .payment-form-group {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   position: relative;
 }
 
 .payment-input-label {
   display: block;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--text-3);
   text-transform: uppercase;
+  letter-spacing: 0.4px;
   margin-bottom: 5px;
-  margin-left: 4px;
+  margin-left: 2px;
+}
+
+.payment-form-container .edit-input {
+  font-size: 14px;
+  height: 44px;
+  padding: 0 14px 0 40px;
+  display: flex;
+  align-items: center;
 }
 
 .payment-form-container .modal-btn {
-  margin-top: 8px;
+  margin-top: 12px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 12px var(--brand-glow);
+  font-size: 14.5px;
+  box-shadow: 0 4px 14px var(--brand-glow);
+  border-radius: 14px;
 }
 
-.input-icon-wrapper {
+.pfc-field {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.input-icon-wrapper svg {
+.pfc-field-icon {
   position: absolute;
-  left: 14px;
+  left: 13px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-3);
   pointer-events: none;
+  display: flex;
+  align-items: center;
   transition: color 0.2s;
+  z-index: 1;
 }
 
-.edit-input:focus + svg {
-  color: var(--brand);
+.pfc-field input {
+  width: 100%;
+  border: 1.5px solid var(--border-2);
+  border-radius: 12px;
+  padding: 0 14px 0 40px;
+  height: 44px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface-2);
+  outline: none;
+  transition: all 0.2s;
+  -webkit-appearance: none;
 }
 
-.edit-input-with-icon {
-  padding-left: 42px !important;
+.pfc-field input::placeholder { color: var(--text-3); }
+.pfc-field input:focus {
+  border-color: var(--brand-mid);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--brand-glow);
 }
+.pfc-field input:focus ~ .pfc-field-icon { color: var(--brand); }
+.pfc-field input.error {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+}
+
+/* legacy compat */
+.input-icon-wrapper { position: relative; }
+.input-icon-wrapper svg {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%); color: var(--text-3);
+  pointer-events: none; transition: color 0.2s;
+}
+.edit-input:focus + svg { color: var(--brand); }
+.edit-input-with-icon { padding-left: 42px !important; }
 
 /* ── PAYMENT OPTIONS CARD ── */
 .payment-option-card {
@@ -2032,30 +2077,28 @@ function showPaymentOptions() {
   card.style.cssText = 'width:100%;max-width:340px;padding:20px;border-radius:24px;border:1px solid var(--border-2);box-shadow:0 12px 30px rgba(0,0,0,0.08);background:#fff;';
   
   card.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border-2);">
-      <div style="width:40px;height:40px;border-radius:12px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow:0 3px 10px var(--brand-glow);flex-shrink:0;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;">
+      <div style="width:38px;height:38px;border-radius:11px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </div>
       <div>
-        <div style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Forma de Pagamento</div>
-        <div style="font-size:10.5px;color:var(--text-3);font-weight:600;margin-top:1px;">Escolha como deseja pagar</div>
+        <div style="font-size:13.5px;font-weight:800;color:var(--text);">Forma de Pagamento</div>
+        <div style="font-size:11px;color:var(--text-3);font-weight:500;margin-top:1px;">Selecione como prefere pagar</div>
       </div>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px;">
+
       <!-- OPÇÃO PIX -->
       <div class="payment-option-card" id="payNowCard">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div style="display:flex;align-items:center;gap:13px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#ECFDF5;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(16,185,129,.15);">
-            <svg width="22" height="22" viewBox="0 0 512 512" fill="#32BCAD"><path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.384 14.765-5.373 20.15 0l76.989 76.989c14.192 14.192 33.064 22 53.12 22h15.098l-97.138 97.138c-29.394 29.394-77.05 29.394-106.444 0L107.02 391.19h5.55zm280.092-271.38c-20.056 0-38.928 7.808-53.12 22l-76.989 76.989c-5.55 5.55-14.6 5.56-20.15 0l-76.693-76.693c-14.192-14.191-33.064-22-53.12-22h-5.55l97.138-97.138c29.394-29.394 77.05-29.394 106.444 0l97.138 97.138-15.098-.296zm52.613 52.613L347.144 74.293c-29.394-29.394-77.05-29.394-106.444 0L142.572 172.422h-30.002c-27.776 0-53.91 10.814-73.56 30.464L23.726 218.17a15.17 15.17 0 0 0 0 21.46l97.138 97.138 97.138 97.138a15.17 15.17 0 0 0 21.46 0l15.284-15.284c19.65-19.65 30.464-45.784 30.464-73.56v-30.002l98.13-98.13c19.65-19.65 45.784-30.464 73.56-30.464h15.098l-97.138-97.138z"/></svg>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:11px;background:#ECFDF5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Pix — Pagar Agora</div>
-            <div class="payment-badge-discount">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              Melhor Preço · 30% OFF
-            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Pix</div>
+            <div style="font-size:11px;color:var(--green-dk);font-weight:600;margin-top:1px;">Melhor preço · 30% OFF</div>
           </div>
           <div class="payment-price-tag">
             <div class="payment-price-main" style="color:var(--green-dk);">R$ ${fmt(pricePix)}</div>
@@ -2067,20 +2110,21 @@ function showPaymentOptions() {
       <!-- OPÇÃO ENTREGA -->
       <div class="payment-option-card" id="payOnDeliveryCard">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div style="display:flex;align-items:center;gap:13px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border-2);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:11px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Pagar na Entrega</div>
-            <div class="payment-badge-standard">Cartão ou Dinheiro</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Na Entrega</div>
+            <div style="font-size:11px;color:var(--text-3);font-weight:500;margin-top:1px;">Cartão ou dinheiro</div>
           </div>
           <div class="payment-price-tag">
             <div class="payment-price-main" style="color:var(--text-2);">R$ ${fmt(priceDelivery)}</div>
-            <div class="payment-price-sub">valor padrão</div>
+            <div class="payment-price-sub">valor cheio</div>
           </div>
         </div>
       </div>
+
     </div>
   `;
   msgsEl.appendChild(card);
@@ -2144,29 +2188,29 @@ function showPaymentOptions() {
             selectedCard.insertAdjacentHTML('beforeend', `
                 <div class="payment-form-container" onclick="event.stopPropagation()">
                     <div class="payment-form-group">
-                        <label class="payment-input-label">Seu Nome</label>
-                        <div class="input-icon-wrapper">
-                            <input type="text" id="userName" class="edit-input edit-input-with-icon" placeholder="Nome Completo" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <label class="payment-input-label">Nome completo</label>
+                        <div class="pfc-field">
+                            <input type="text" id="userName" autocomplete="name" inputmode="text" placeholder="Seu nome" required>
+                            <span class="pfc-field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
                         </div>
                     </div>
                     <div class="payment-form-group">
                         <label class="payment-input-label">CPF</label>
-                        <div class="input-icon-wrapper">
-                            <input type="tel" id="userCpf" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <div class="pfc-field">
+                            <input type="text" id="userCpf" autocomplete="off" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" required>
+                            <span class="pfc-field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
                         </div>
                     </div>
                     <div class="payment-form-group">
                         <label class="payment-input-label">WhatsApp</label>
-                        <div class="input-icon-wrapper">
-                            <input type="tel" id="userPhone" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <div class="pfc-field">
+                            <input type="tel" id="userPhone" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000" maxlength="15" required>
+                            <span class="pfc-field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
                         </div>
                     </div>
                     <button class="modal-btn" id="confirmPaymentBtn" type="button">
-                        <span>Confirmar e Prosseguir</span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        Confirmar e Prosseguir
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                 </div>
             `);
@@ -2296,10 +2340,10 @@ function showPaymentOptions() {
             input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
         });
 
-        // 6. Scroll suave
+        // 6. Scroll suave — usa 'nearest' para não forçar reposicionamento agressivo
         setTimeout(() => {
-            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 150);
     }
 
 
