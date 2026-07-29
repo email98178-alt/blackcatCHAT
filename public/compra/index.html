@@ -88,7 +88,7 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Diskgas — Atendimento</title>
+<title>Atendimento</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script type="text/javascript">
@@ -1293,7 +1293,7 @@ const ORDER = parseOrderData();
 function buildPixItems() {
   if (!Array.isArray(ORDER.products) || ORDER.products.length === 0) {
     return [{
-      title: ORDER.productName || 'Pedido Diskgás',
+      title: ORDER.productName || 'Pedido',
       unitPrice: Math.round(Number(ORDER.productPrice) * 100),
       quantity: 1
     }];
