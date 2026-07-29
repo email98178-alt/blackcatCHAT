@@ -1931,7 +1931,7 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
     // Variáveis para controlar se a primeira mensagem de fricção já foi enviada
   const chatHistoryLower = chatHistory.toLowerCase();
 
-  const hasSentEntregaMsg1 = chatHistoryLower.includes("garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago.");
+  const hasSentEntregaMsg1 = chatHistoryLower.includes("garantimos a entrega do seu gás, caso contrário faremos o reembolso completo do valor pago.");
   const hasSentPixMsg1 = chatHistoryLower.includes("o pagamento via pix na diskgas é 100% seguro e instantâneo.");
   const hasSentQualidadeMsg1 = chatHistoryLower.includes("trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis.");
   const hasSentConfiancaMsg1 = chatHistoryLower.includes("a diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos.");
@@ -1940,7 +1940,7 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const msgEntrega1 = "Fique tranquilo, sua compra é protegida e assegurada pela Diskgás, garantimos a entrega no prazo ou fazemos a devolução do seu dinheiro. 😄";
   const msgPix1 = "O pagamento via Pix é 100% seguro e protegido. A entrega é garantida e a aprovação imediata, e em caso de qualquer problema fazemos o reembolso completo do valor pago. 😄";
   const msgQualidade1 = "Trabalhamos apenas com produtos certificados. Garantimos a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade.";
-  const msgConfianca1 = "A sua compra é assegurada pela Diskgas, garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
+  const msgConfianca1 = "Não se preocupe, sua compra é assegurada pela Diskgas, garantimos a entrega no prazo ou fazemos o reembolso completo do valor pago. 😄";
 
   // Mensagens de conversão - Nível 2 (novas, mais detalhadas)
   const msgEntrega2 = "Entendo sua preocupação. Além da nossa garantia de reembolso, saiba que contamos com uma logística otimizada e entregadores treinados para assegurar que seu pedido chegue rápido e em perfeitas condições. Sua tranquilidade é nossa prioridade! 😄";
