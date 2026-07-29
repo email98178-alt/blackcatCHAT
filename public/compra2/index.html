@@ -711,36 +711,37 @@ html,body{
 .payment-option-card {
   background: var(--surface);
   border: 1.5px solid var(--border-2);
-  border-radius: 20px;
-  padding: 18px;
+  border-radius: 18px;
+  padding: 16px;
   margin: 0;
   width: 100%;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 }
 
 .payment-option-card:hover {
-  border-color: var(--brand-mid);
+  border-color: rgba(15,91,168,.35);
   background: var(--surface-2);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,.06);
 }
 
 .payment-option-card.selected {
   border-color: var(--brand);
   background: #fff;
-  box-shadow: 0 8px 20px var(--brand-glow);
+  box-shadow: 0 6px 22px var(--brand-glow);
 }
 
 .payment-option-card .check-badge {
   position: absolute;
   top: -8px;
   right: -8px;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   background: var(--brand);
   color: #fff;
   border-radius: 50%;
@@ -768,25 +769,130 @@ html,body{
   border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.payment-badge-standard {
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  border: 1px solid var(--border-2);
 }
 
 .payment-price-tag {
   text-align: right;
+  flex-shrink: 0;
 }
 
 .payment-price-main {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
   color: var(--text);
   letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .payment-price-sub {
   font-size: 10px;
   color: var(--text-3);
   font-weight: 600;
+  margin-top: 2px;
 }
+
+/* ── DELIVERY WARNING MODAL ── */
+.delivery-warning-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  padding: 20px;
+}
+.delivery-warning-overlay.on { display: flex; }
+.delivery-warning-modal {
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px 22px 22px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.18);
+  animation: cardIn .35s var(--spring);
+  position: relative;
+}
+.dwm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.dwm-close:hover { background: var(--border-2); color: var(--text); }
+.dwm-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #FFF7ED;
+  border: 1px solid rgba(245,158,11,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #D97706;
+  margin: 0 auto 16px;
+}
+.dwm-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+.dwm-body {
+  font-size: 13px;
+  color: var(--text-2);
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.dwm-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 14px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.dwm-btn:hover { background: var(--brand-mid); }
 /* ── PIX CARD (new clean design) ── */
 .pix-card {
   background: var(--surface);
@@ -1263,6 +1369,21 @@ html,body{
     </div>
   </div>
 
+  <!-- DELIVERY WARNING MODAL -->
+  <div class="delivery-warning-overlay" id="deliveryWarningOverlay">
+    <div class="delivery-warning-modal">
+      <button class="dwm-close" id="deliveryWarningClose" aria-label="Fechar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="dwm-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="dwm-title" id="deliveryWarningTitle">Pagamento na Entrega</div>
+      <div class="dwm-body" id="deliveryWarningBody"></div>
+      <button class="dwm-btn" id="deliveryWarningBtn">Entendido</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1297,6 +1418,28 @@ const typingAvatarTriggerEl = document.getElementById('typingAvatarTrigger');
 
 const openSellerModal = () => sellerModalOverlayEl.classList.add('on');
 const closeSellerModal = () => sellerModalOverlayEl.classList.remove('on');
+
+// Delivery Warning Modal
+const deliveryWarningOverlayEl = document.getElementById('deliveryWarningOverlay');
+const deliveryWarningCloseEl   = document.getElementById('deliveryWarningClose');
+const deliveryWarningBtnEl     = document.getElementById('deliveryWarningBtn');
+const deliveryWarningBodyEl    = document.getElementById('deliveryWarningBody');
+
+function openDeliveryWarning() {
+  const diaSemana = new Date().getDay(); // 0=Dom, 6=Sab
+  const isFimDeSemana = (diaSemana === 0 || diaSemana === 6);
+  deliveryWarningBodyEl.textContent = isFimDeSemana
+    ? 'Pagamentos na entrega estão disponíveis apenas de segunda a sexta-feira. Nos finais de semana, aceitamos somente Pix para garantir a agilidade nas entregas.'
+    : 'Pagamentos na entrega estão disponíveis apenas aos sábados e domingos. Durante a semana, aceitamos somente Pix para garantir a agilidade nas entregas.';
+  deliveryWarningOverlayEl.classList.add('on');
+}
+function closeDeliveryWarning() {
+  deliveryWarningOverlayEl.classList.remove('on');
+}
+
+deliveryWarningCloseEl.onclick = closeDeliveryWarning;
+deliveryWarningBtnEl.onclick   = closeDeliveryWarning;
+deliveryWarningOverlayEl.onclick = (e) => { if (e.target === deliveryWarningOverlayEl) closeDeliveryWarning(); };
 
 closeSellerModalEl.onclick = closeSellerModal;
 closeSellerModalBtnEl.onclick = closeSellerModal;
@@ -1889,49 +2032,52 @@ function showPaymentOptions() {
   card.style.cssText = 'width:100%;max-width:340px;padding:20px;border-radius:24px;border:1px solid var(--border-2);box-shadow:0 12px 30px rgba(0,0,0,0.08);background:#fff;';
   
   card.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <div style="width:38px;height:38px;border-radius:12px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 4px 12px var(--brand-glow);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border-2);">
+      <div style="width:40px;height:40px;border-radius:12px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow:0 3px 10px var(--brand-glow);flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </div>
       <div>
         <div style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Forma de Pagamento</div>
-        <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.6px;">Selecione uma opção abaixo</div>
+        <div style="font-size:10.5px;color:var(--text-3);font-weight:600;margin-top:1px;">Escolha como deseja pagar</div>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
       <!-- OPÇÃO PIX -->
       <div class="payment-option-card" id="payNowCard">
-        <div class="check-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:46px; height:46px; border-radius:12px; background:#F0FDF4; color:#10B981; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#ECFDF5;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(16,185,129,.15);">
+            <svg width="22" height="22" viewBox="0 0 512 512" fill="#32BCAD"><path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.384 14.765-5.373 20.15 0l76.989 76.989c14.192 14.192 33.064 22 53.12 22h15.098l-97.138 97.138c-29.394 29.394-77.05 29.394-106.444 0L107.02 391.19h5.55zm280.092-271.38c-20.056 0-38.928 7.808-53.12 22l-76.989 76.989c-5.55 5.55-14.6 5.56-20.15 0l-76.693-76.693c-14.192-14.191-33.064-22-53.12-22h-5.55l97.138-97.138c29.394-29.394 77.05-29.394 106.444 0l97.138 97.138-15.098-.296zm52.613 52.613L347.144 74.293c-29.394-29.394-77.05-29.394-106.444 0L142.572 172.422h-30.002c-27.776 0-53.91 10.814-73.56 30.464L23.726 218.17a15.17 15.17 0 0 0 0 21.46l97.138 97.138 97.138 97.138a15.17 15.17 0 0 0 21.46 0l15.284-15.284c19.65-19.65 30.464-45.784 30.464-73.56v-30.002l98.13-98.13c19.65-19.65 45.784-30.464 73.56-30.464h15.098l-97.138-97.138z"/></svg>
           </div>
-          <div style="flex:1;">
-            <div style="font-size:13px; font-weight:800; color:var(--text);">Pagar Agora (Pix)</div>
-            <div class="payment-badge-discount">30% OFF</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Pix — Pagar Agora</div>
+            <div class="payment-badge-discount">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Melhor Preço · 30% OFF
+            </div>
           </div>
           <div class="payment-price-tag">
-            <div class="payment-price-main">R$ ${fmt(pricePix)}</div>
-            <div class="payment-price-sub">Melhor Preço</div>
+            <div class="payment-price-main" style="color:var(--green-dk);">R$ ${fmt(pricePix)}</div>
+            <div class="payment-price-sub">à vista</div>
           </div>
         </div>
       </div>
 
       <!-- OPÇÃO ENTREGA -->
       <div class="payment-option-card" id="payOnDeliveryCard">
-        <div class="check-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:46px; height:46px; border-radius:12px; background:var(--surface-2); color:var(--text-3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border-2);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           </div>
-          <div style="flex:1;">
-            <div style="font-size:13px; font-weight:800; color:var(--text);">Pagar na Entrega</div>
-            <div style="font-size:11px; color:var(--text-3); font-weight:500;">Cartão ou Dinheiro</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Pagar na Entrega</div>
+            <div class="payment-badge-standard">Cartão ou Dinheiro</div>
           </div>
           <div class="payment-price-tag">
             <div class="payment-price-main" style="color:var(--text-2);">R$ ${fmt(priceDelivery)}</div>
-            <div class="payment-price-sub">Valor Padrão</div>
+            <div class="payment-price-sub">valor padrão</div>
           </div>
         </div>
       </div>
@@ -2062,20 +2208,28 @@ function showPaymentOptions() {
             const phoneVal = formContainer.querySelector('#userPhone').value.trim();
 
             if (nameVal && cpfVal && phoneVal) {
-                // 2. ESTADO: Confirmado
-                confirmBtn.disabled = true;
-                confirmBtn.style.background = "var(--green)";
-                confirmBtn.style.color = "#fff";
-                confirmBtn.style.opacity = "1";
-                confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
-
                 // Salva os dados
                 if (!window.ORDER) window.ORDER = {};
                 window.ORDER.customerName = nameVal;
                 window.ORDER.customerCpf = cpfVal;
                 window.ORDER.customerPhone = phoneVal;
 
-                                // 3. FINALIZAÇÃO
+                // Se for pagamento na entrega, exibe o modal de aviso de disponibilidade
+                if (choice === 'delivery') {
+                    // Libera os campos para o usuário ainda poder interagir após fechar o modal
+                    formContainer.querySelectorAll('input').forEach(i => i.readOnly = false);
+                    openDeliveryWarning();
+                    return; // Não prossegue com a finalização
+                }
+
+                // 2. ESTADO: Confirmado (apenas para Pix)
+                confirmBtn.disabled = true;
+                confirmBtn.style.background = "var(--green)";
+                confirmBtn.style.color = "#fff";
+                confirmBtn.style.opacity = "1";
+                confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
+
+                // 3. FINALIZAÇÃO
                 setTimeout(() => {
                     // Marca o pagamento como confirmado no estado global
                     window._paymentConfirmed = true;
@@ -2085,7 +2239,7 @@ function showPaymentOptions() {
                     
                     // Se o fluxo principal estiver aguardando, a resolução da promessa acima
                     // fará com que ele continue automaticamente.
-                }, 400); 
+                }, 400);
 
             } else {
                 // Se der erro, liberamos os campos novamente
