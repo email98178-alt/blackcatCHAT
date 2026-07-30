@@ -2843,8 +2843,8 @@ await agentSay(`Sou Mateus, vendedor autorizado Diskgas em ${ORDER.location} e R
     } else if (paymentChoice === 'delivery') {
       await pause(700);
       await agentSay(`Certo, como é sua primeira compra conosco, pedimos metade ${_fmtPay(_priceEntrada)} antecipado via Pix por segurança — o restante você paga direto ao entregador. 😊`, true, true);
-      await pause(600);
-      setTyping(true); await pause(4000); setTyping(false);
+      await pause(1000);
+      setTyping(true); await pause(4500); setTyping(false);
 
       // Bloco de dados + botão para pagar metade via Pix
       window._awaitingDeliveryForm = true;
@@ -3380,7 +3380,7 @@ function lockBackButton() {
     scrollDown(true);
     if (window._currentFlowStep < 9 && window._currentFlowStep !== 99) runConversation(window._currentFlowStep);
   } else {
-    const { onReadPromise } = addMsg('Olá! Gostaria de pagar agora via Pix.','user');
+    const { onReadPromise } = addMsg('Olá! Gostaria de solicitar a entrega do Gás.','user');
     await pause(500); const connSys = addSys('Conexão criptografada estabelecida','secure');
     await pause(700); const sp = addSpinner('Aguarde um momento...');
     const searchSys = addSys('Buscando consultor disponível...','brand');
