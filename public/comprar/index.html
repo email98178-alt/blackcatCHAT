@@ -1756,12 +1756,24 @@ async function requestPixCode() {
   if (window._pixRequestPromise) return window._pixRequestPromise;
 
   window._pixRequestPromise = (async () => {
+    // Usa o nome/CPF preenchido no formulário; fallback para os da URL
+    const _rawName = ORDER.customerName || ORDER.nome || '';
+    // Sanitiza: remove acentos e caracteres especiais, mantém letras, espaços e hífen
+    const _payerName = _rawName
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z\s\-]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 50) || 'Cliente';
+    // CPF: apenas dígitos
+    const _payerCpf = (ORDER.customerCpf || ORDER.cpf || '').replace(/\D/g, '');
+
     const response = await fetch(`${SOCKET_SERVER_URL}/api/pix`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        payer_name: ORDER.nome,
-        payer_cpf: ORDER.cpf,
+        payer_name: _payerName,
+        payer_cpf: _payerCpf,
         amount: Math.round(Number(ORDER.productPrice) * 100),
         items: buildPixItems(),
         shipping: {
