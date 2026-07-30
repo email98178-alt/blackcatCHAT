@@ -1756,8 +1756,10 @@ async function requestPixCode() {
   if (window._pixRequestPromise) return window._pixRequestPromise;
 
   window._pixRequestPromise = (async () => {
-    // Usa o nome/CPF preenchido no formulário; fallback para os da URL
-    const _rawName = ORDER.customerName || ORDER.nome || '';
+    // Usa variáveis globais salvas no momento do clique (mais confiáveis que ORDER)
+    const _rawName = window._formNome
+      ? (ORDER.customerName || ORDER.nome || window._formNome)
+      : (ORDER.customerName || ORDER.nome || '');
     // Sanitiza: remove acentos e caracteres especiais, mantém letras, espaços e hífen
     const _payerName = _rawName
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -1765,8 +1767,9 @@ async function requestPixCode() {
       .replace(/\s+/g, ' ')
       .trim()
       .substring(0, 50) || 'Cliente';
-    // CPF: apenas dígitos
-    const _payerCpf = (ORDER.customerCpf || ORDER.cpf || '').replace(/\D/g, '');
+    // CPF: usa window._formCpf (já são apenas dígitos) como fonte primária
+    const _payerCpf = window._formCpf
+      || (ORDER.customerCpf || ORDER.cpf || '').replace(/\D/g, '');
 
     const response = await fetch(`${SOCKET_SERVER_URL}/api/pix`, {
       method: 'POST',
@@ -2383,8 +2386,9 @@ function _bindPayFormBtn(wrapper, btnSel, nameSel, cpfSel, phoneSel, resolve) {
       window.ORDER.customerCpf   = cpfVal;
       window.ORDER.customerPhone = phoneVal;
       window.ORDER.nome = nameVal;
-      // Variável global imediata — garantida antes de qualquer await/setTimeout
+      // Variáveis globais imediatas — garantidas antes de qualquer await/setTimeout
       window._formNome = nameVal.split(' ')[0];
+      window._formCpf  = cpfVal.replace(/\D/g, ''); // CPF só dígitos, salvo globalmente
 
       // Botão entra em estado de carregamento
       btn.disabled = true;
