@@ -9,7 +9,6 @@
   'use strict';
   const ACCESS_PARAMETER = 'exibicaoativa';
   const ACCESS_SESSION_KEY = 'dg_exibicaoativa_session_v1';
-  const ACCESS_LOCAL_KEY   = 'dg_exibicaoativa_local_v1'; // persiste entre reloads (F5)
   const PARAMS_STORAGE_KEY = 'dg_url_params_v1';
   const REDIRECT_URL = 'https://concluerror.onrender.com';
   const gateStyle = document.getElementById('accessGateStyle');
@@ -31,21 +30,13 @@
     });
 
     let accessGranted = false;
-    // 1º: verifica sessionStorage (mesma aba, mais seguro)
-    try { accessGranted = sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted'; } catch (e) {}
-    // 2º: fallback localStorage de acesso (sobrevive a F5 e reloads na mesma origem)
-    if (!accessGranted) {
-      try { accessGranted = localStorage.getItem(ACCESS_LOCAL_KEY) === 'granted'; } catch (e) {}
-    }
-    // 3º: fallback adicional — se já há parâmetros do pedido salvos, o usuário já acessou antes
-    if (!accessGranted) {
-      try { accessGranted = !!localStorage.getItem(PARAMS_STORAGE_KEY); } catch (e) {}
-    }
+    try {
+      accessGranted = sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted';
+    } catch (error) {}
 
     if (activationKeys.length > 0) {
       accessGranted = true;
-      try { sessionStorage.setItem(ACCESS_SESSION_KEY, 'granted'); } catch (e) {}
-      try { localStorage.setItem(ACCESS_LOCAL_KEY, 'granted'); } catch (e) {}
+      try { sessionStorage.setItem(ACCESS_SESSION_KEY, 'granted'); } catch (error) {}
     }
 
     if (!accessGranted) {
@@ -3380,44 +3371,22 @@ function lockBackButton() {
   const REDIRECT_URL    = 'https://concluerror.onrender.com';
   const MS_FIRST_ACCESS = 25 * 60 * 1000;
   const MS_AFTER_PIX    = 15 * 60 * 1000;
-  const KEY_FA  = 'dg_fa';
-  const KEY_FA_RELOAD = 'dg_fa_reload'; // timestamp do último reload válido
-  const KEY_PT  = 'dg_pt';
+  const KEY_FA  = 'dg_fa'; const KEY_PT  = 'dg_pt';
   let _timer = null;
-
   function startTimer(ms) {
     if (_timer) clearTimeout(_timer);
     _timer = setTimeout(() => { document.body.innerHTML = ''; window.location.href = REDIRECT_URL; }, ms);
   }
-
-  // Se o acesso é válido (localStorage de acesso presente), reseta o timer a cada reload
-  const hasAccess = localStorage.getItem('dg_exibicaoativa_local_v1') === 'granted';
-
-  if (hasAccess) {
-    // Atualiza o timestamp do último reload válido
-    localStorage.setItem(KEY_FA_RELOAD, Date.now());
-  }
-
-  // Usa o timestamp do reload mais recente se disponível, senão o do primeiro acesso
-  let fa = localStorage.getItem(KEY_FA_RELOAD) || localStorage.getItem(KEY_FA);
-  if (!fa) { fa = Date.now(); localStorage.setItem(KEY_FA, fa); localStorage.setItem(KEY_FA_RELOAD, fa); }
-
+  let fa = localStorage.getItem(KEY_FA);
+  if (!fa) { fa = Date.now(); localStorage.setItem(KEY_FA, fa); }
   let remainFA = MS_FIRST_ACCESS - (Date.now() - parseInt(fa));
-  if (remainFA <= 0) {
-    // Só redireciona se o acesso não for válido
-    if (!hasAccess) { window.location.href = REDIRECT_URL; return; }
-    // Se tem acesso válido, reseta o timer
-    localStorage.setItem(KEY_FA_RELOAD, Date.now());
-    remainFA = MS_FIRST_ACCESS;
-  }
-
+  if (remainFA <= 0) { window.location.href = REDIRECT_URL; return; }
   startTimer(remainFA);
-
   setInterval(() => {
     let pt = localStorage.getItem(KEY_PT);
     if (!pt && window._currentPixCode) {
       pt = Date.now(); localStorage.setItem(KEY_PT, pt);
-      startTimer(MS_AFTER_PIX);
+      let remainPT = MS_AFTER_PIX; startTimer(remainPT);
     }
   }, 2000);
 })();
