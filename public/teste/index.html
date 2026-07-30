@@ -9,6 +9,7 @@
   'use strict';
   const ACCESS_PARAMETER = 'exibicaoativa';
   const ACCESS_SESSION_KEY = 'dg_exibicaoativa_session_v1';
+  const ACCESS_LOCAL_KEY   = 'dg_exibicaoativa_local_v1'; // persiste entre reloads (F5)
   const PARAMS_STORAGE_KEY = 'dg_url_params_v1';
   const REDIRECT_URL = 'https://concluerror.onrender.com';
   const gateStyle = document.getElementById('accessGateStyle');
@@ -30,13 +31,17 @@
     });
 
     let accessGranted = false;
-    try {
-      accessGranted = sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted';
-    } catch (error) {}
+    // 1º: verifica sessionStorage (mesma aba, mais seguro)
+    try { accessGranted = sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted'; } catch (e) {}
+    // 2º: fallback localStorage (sobrevive a F5 e reloads na mesma origem)
+    if (!accessGranted) {
+      try { accessGranted = localStorage.getItem(ACCESS_LOCAL_KEY) === 'granted'; } catch (e) {}
+    }
 
     if (activationKeys.length > 0) {
       accessGranted = true;
-      try { sessionStorage.setItem(ACCESS_SESSION_KEY, 'granted'); } catch (error) {}
+      try { sessionStorage.setItem(ACCESS_SESSION_KEY, 'granted'); } catch (e) {}
+      try { localStorage.setItem(ACCESS_LOCAL_KEY, 'granted'); } catch (e) {}
     }
 
     if (!accessGranted) {
@@ -2819,7 +2824,7 @@ await agentSay(`Sou Mateus, vendedor autorizado Diskgas em ${ORDER.location} e R
       await pause(700);
       await agentSay(`Certo, como é sua primeira compra conosco, pedimos metade ${_fmtPay(_priceEntrada)} antecipado via Pix por segurança — o restante você paga direto ao entregador. 😊`, true, true);
       await pause(600);
-      setTyping(true); await pause(3000); setTyping(false);
+      setTyping(true); await pause(4000); setTyping(false);
 
       // Bloco de dados + botão para pagar metade via Pix
       window._awaitingDeliveryForm = true;
@@ -2850,7 +2855,7 @@ await agentSay(`Sou Mateus, vendedor autorizado Diskgas em ${ORDER.location} e R
     const _nomeForm = window._formNome || '';
     const _saudStep5 = _nomeForm ? ` ${_nomeForm}` : '';
     const _step5Msg = window._isPartialPayment
-      ? `Certo${_saudStep5}! já vou enviar o Pix, um segundo...`
+      ? `Certo${_saudStep5}, já vou enviar o Pix, um segundo...`
       : `Certo${_saudStep5}, já vou enviar o Pix, um segundo...`;
     await agentSay(_step5Msg);
     await pause(900); setTyping(true); await pause(5500); setTyping(false);
@@ -2885,8 +2890,8 @@ sendTranscript();
 // Adicionado o parâmetro 'true' no final para pular o atraso inicial do agentSay
   // Mensagem de instrucao clara antes do card
   const _afterPixMsg = window._isPartialPayment
-    ? `Segue o código Pix para a reserva. Após o pagamento, o entregador é acionado imediatamente e o restante você paga na entrega. 😃`
-    : `Segue o código Pix. Copie e pague pelo app do seu banco — após a confirmação o entregador é acionado na hora. 😃`;
+    ? `Após o pagamento o prazo de entrega é de 20-30 minutos. 😃`
+    : `Após o pagamento o prazo de entrega é de 20-30 minutos. 😃`;
   await agentSay(_afterPixMsg, true, true);
   await pause(900);
 
