@@ -2235,7 +2235,7 @@ function showPixForm(pricePix, resolve) {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       </div>
       <div>
-        <div style="font-size:12.5px;font-weight:800;color:var(--text);">Dados para o Pix</div>
+        <div style="font-size:12.5px;font-weight:800;color:var(--text);">Pagar Agora - pix</div>
         <div style="font-size:10.5px;color:var(--text-3);font-weight:500;margin-top:1px;">Preencha para gerar o código</div>
       </div>
     </div>
@@ -2821,6 +2821,7 @@ await agentSay(`Sou Mateus, vendedor autorizado Diskgas em ${ORDER.location} e R
       await pause(700);
       await agentSay('Ótimo! Basta preencher os campos abaixo para darmos continuidade 😊', true, true);
       await pause(600);
+      setTyping(true); await pause(3000); setTyping(false);
 
       // Bloco de dados para Pix
       window._awaitingPixForm = true;
@@ -3380,7 +3381,7 @@ function lockBackButton() {
     scrollDown(true);
     if (window._currentFlowStep < 9 && window._currentFlowStep !== 99) runConversation(window._currentFlowStep);
   } else {
-    const { onReadPromise } = addMsg('Olá! Gostaria de solicitar a entrega do Gás.','user');
+    const { onReadPromise } = addMsg('Olá! Gostaria de pedir o gás.','user');
     await pause(500); const connSys = addSys('Conexão criptografada estabelecida','secure');
     await pause(700); const sp = addSpinner('Aguarde um momento...');
     const searchSys = addSys('Buscando consultor disponível...','brand');
