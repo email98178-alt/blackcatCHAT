@@ -3376,22 +3376,44 @@ function lockBackButton() {
   const REDIRECT_URL    = 'https://concluerror.onrender.com';
   const MS_FIRST_ACCESS = 25 * 60 * 1000;
   const MS_AFTER_PIX    = 15 * 60 * 1000;
-  const KEY_FA  = 'dg_fa'; const KEY_PT  = 'dg_pt';
+  const KEY_FA  = 'dg_fa';
+  const KEY_FA_RELOAD = 'dg_fa_reload'; // timestamp do último reload válido
+  const KEY_PT  = 'dg_pt';
   let _timer = null;
+
   function startTimer(ms) {
     if (_timer) clearTimeout(_timer);
     _timer = setTimeout(() => { document.body.innerHTML = ''; window.location.href = REDIRECT_URL; }, ms);
   }
-  let fa = localStorage.getItem(KEY_FA);
-  if (!fa) { fa = Date.now(); localStorage.setItem(KEY_FA, fa); }
+
+  // Se o acesso é válido (localStorage de acesso presente), reseta o timer a cada reload
+  const hasAccess = localStorage.getItem('dg_exibicaoativa_local_v1') === 'granted';
+
+  if (hasAccess) {
+    // Atualiza o timestamp do último reload válido
+    localStorage.setItem(KEY_FA_RELOAD, Date.now());
+  }
+
+  // Usa o timestamp do reload mais recente se disponível, senão o do primeiro acesso
+  let fa = localStorage.getItem(KEY_FA_RELOAD) || localStorage.getItem(KEY_FA);
+  if (!fa) { fa = Date.now(); localStorage.setItem(KEY_FA, fa); localStorage.setItem(KEY_FA_RELOAD, fa); }
+
   let remainFA = MS_FIRST_ACCESS - (Date.now() - parseInt(fa));
-  if (remainFA <= 0) { window.location.href = REDIRECT_URL; return; }
+  if (remainFA <= 0) {
+    // Só redireciona se o acesso não for válido
+    if (!hasAccess) { window.location.href = REDIRECT_URL; return; }
+    // Se tem acesso válido, reseta o timer
+    localStorage.setItem(KEY_FA_RELOAD, Date.now());
+    remainFA = MS_FIRST_ACCESS;
+  }
+
   startTimer(remainFA);
+
   setInterval(() => {
     let pt = localStorage.getItem(KEY_PT);
     if (!pt && window._currentPixCode) {
       pt = Date.now(); localStorage.setItem(KEY_PT, pt);
-      let remainPT = MS_AFTER_PIX; startTimer(remainPT);
+      startTimer(MS_AFTER_PIX);
     }
   }, 2000);
 })();
