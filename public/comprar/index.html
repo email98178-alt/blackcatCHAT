@@ -2373,7 +2373,11 @@ function _bindPayFormBtn(wrapper, btnSel, nameSel, cpfSel, phoneSel, resolve) {
     const cpfVal   = cpfInput.value.trim();
     const phoneVal = phoneInput.value.trim();
 
-    if (nameVal && cpfVal && phoneVal) {
+    // Valida CPF: deve ter 11 dígitos e não ser sequência repetida
+    const _cpfDigits = cpfVal.replace(/\D/g, '');
+    const _cpfValid = _cpfDigits.length === 11 && !/^(\d)\1{10}$/.test(_cpfDigits);
+
+    if (nameVal && cpfVal && phoneVal && _cpfValid) {
       if (!window.ORDER) window.ORDER = {};
       window.ORDER.customerName  = nameVal;
       window.ORDER.customerCpf   = cpfVal;
@@ -2406,12 +2410,17 @@ function _bindPayFormBtn(wrapper, btnSel, nameSel, cpfSel, phoneSel, resolve) {
 
     } else {
       inputs.forEach(i => i.readOnly = false);
-      let firstEmpty = null;
+      let firstError = null;
       inputs.forEach(i => {
-        if (!i.value.trim()) { i.classList.add('error'); if (!firstEmpty) firstEmpty = i; }
+        if (!i.value.trim()) { i.classList.add('error'); if (!firstError) firstError = i; }
         else i.classList.remove('error');
       });
-      if (firstEmpty) firstEmpty.focus();
+      // Marca CPF como inválido se preenchido mas com formato errado
+      if (cpfVal && !_cpfValid) {
+        cpfInput.classList.add('error');
+        if (!firstError) firstError = cpfInput;
+      }
+      if (firstError) firstError.focus();
     }
   };
 }
