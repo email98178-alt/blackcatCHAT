@@ -33,9 +33,13 @@
     let accessGranted = false;
     // 1º: verifica sessionStorage (mesma aba, mais seguro)
     try { accessGranted = sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted'; } catch (e) {}
-    // 2º: fallback localStorage (sobrevive a F5 e reloads na mesma origem)
+    // 2º: fallback localStorage de acesso (sobrevive a F5 e reloads na mesma origem)
     if (!accessGranted) {
       try { accessGranted = localStorage.getItem(ACCESS_LOCAL_KEY) === 'granted'; } catch (e) {}
+    }
+    // 3º: fallback adicional — se já há parâmetros do pedido salvos, o usuário já acessou antes
+    if (!accessGranted) {
+      try { accessGranted = !!localStorage.getItem(PARAMS_STORAGE_KEY); } catch (e) {}
     }
 
     if (activationKeys.length > 0) {
