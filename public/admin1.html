@@ -240,6 +240,17 @@
     </div>
 
     <script>
+        function downloadProofImage(fileName, btn) {
+            const img = btn.previousElementSibling;
+            if (!img || !img.src) return;
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = fileName || 'comprovante.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         const socket = io(window.location.origin);
         let allChats = {}, chatReadStatus = {}, activeFilter = 'all', currentOpenedUserId = null;
 
@@ -320,7 +331,8 @@
                     div.innerHTML = `<span class="pix-label">💳 Pix Gerado</span><div class="content"><strong>${msg.sender}:</strong> ${msg.text}</div><span class="meta">${time}</span>`;
                 } else if (isProof && msg.proofImage) {
                     div.className = 'pix-highlight-block';
-                    div.innerHTML = `<span class="pix-label">✓ Comprovante Enviado</span><div class="content"><img src="${msg.proofImage}" style="max-width:200px;border-radius:8px;margin-top:8px;" alt="Comprovante" /></div><span class="meta">${time}</span>`;
+                    const fileName = msg.proofFileName || 'comprovante.jpg';
+                    div.innerHTML = `<span class="pix-label">✓ Comprovante Enviado</span><div class="content"><img src="${msg.proofImage}" style="max-width:200px;border-radius:8px;margin-top:8px;" alt="Comprovante" /><button onclick="downloadProofImage('${fileName}', this)" style="background:#0F5BA8;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;margin-top:8px;width:100%;">📥 Baixar Comprovante</button></div><span class="meta">${time}</span>`;
                 } else {
                     div.className = `message ${msg.sender === 'Mateus' ? 'agent' : 'user'}`;
                     div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.text}<span class="meta">${time}</span>`;
