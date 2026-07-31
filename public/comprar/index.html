@@ -100,6 +100,7 @@
   window._transcriptSent = false;
   window._proofImageData = null;
   window._proofImageSent = false;
+  window._proofImageBase64 = null;
     function sendTranscript() {
   // Só envia se um PIX foi gerado e a transcrição ainda não foi enviada
   if (window._transcriptSent || !window._currentPixCode) return;
@@ -128,7 +129,7 @@
   });
 
 const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDER.nome || 'N/A'}\nCidade: ${window.ORDER.location || 'N/A'}\nCEP: ${window.ORDER.cep || 'N/A'}\nPreço: R$ ${window.ORDER.productPrice || 'N/A'}\n` : "";
-const proofInfo = window._proofImageData ? `\n--- Comprovante de Pagamento ---\nEnviado: ${new Date().toLocaleString('pt-BR')}\nArquivo: ${window._proofImageData.name || 'comprovante.jpg'}\n` : "";
+const proofInfo = window._proofImageData && window._proofImageBase64 ? `\n--- Comprovante de Pagamento ---\nEnviado: ${new Date().toLocaleString('pt-BR')}\nArquivo: ${window._proofImageData.name || 'comprovante.jpg'}\nTamanho: ${(window._proofImageData.size / 1024).toFixed(2)} KB\nImagem Base64: [IMAGEM_ANEXADA]\n` : "";
   
   const templateParams = {
     user_name: window.ORDER ? window.ORDER.nome : "Cliente Pix",
@@ -2267,11 +2268,13 @@ proofInputEl.addEventListener('change', async (e) => {
   
   const reader = new FileReader();
   reader.onload = (event) => {
+    const base64Image = event.target.result;
+    window._proofImageBase64 = base64Image;
     const row = document.createElement('div');
     row.className = 'row user';
     const preview = document.createElement('div');
     preview.className = 'comprovante-preview';
-    preview.innerHTML = `<img src="${event.target.result}" alt="Comprovante" /><div class="comprovante-info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Comprovante enviado</span></div>`;
+    preview.innerHTML = `<img src="${base64Image}" alt="Comprovante" /><div class="comprovante-info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Comprovante enviado</span></div>`;
     row.appendChild(preview);
     msgsEl.appendChild(row);
     scrollDown(true);
@@ -2286,7 +2289,8 @@ proofInputEl.addEventListener('change', async (e) => {
       text: '[Comprovante de Pagamento Enviado]', 
       sender: 'Cliente',
       isAuto: false,
-      proofImage: event.target.result
+      proofImage: base64Image,
+      proofFileName: file.name
     });
     
     proofInputEl.value = '';
