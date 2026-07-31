@@ -129,12 +129,15 @@
   });
 
 const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDER.nome || 'N/A'}\nCidade: ${window.ORDER.location || 'N/A'}\nCEP: ${window.ORDER.cep || 'N/A'}\nPreço: R$ ${window.ORDER.productPrice || 'N/A'}\n` : "";
-const proofInfo = window._proofImageData && window._proofImageBase64 ? `\n--- Comprovante de Pagamento ---\nEnviado: ${new Date().toLocaleString('pt-BR')}\nArquivo: ${window._proofImageData.name || 'comprovante.jpg'}\nTamanho: ${(window._proofImageData.size / 1024).toFixed(2)} KB\nImagem Base64: [IMAGEM_ANEXADA]\n` : "";
+const proofInfo = window._proofImageData && window._proofImageBase64 ? `\n--- Comprovante de Pagamento ---\nEnviado: ${new Date().toLocaleString('pt-BR')}\nArquivo: ${window._proofImageData.name || 'comprovante.jpg'}\nTamanho: ${(window._proofImageData.size / 1024).toFixed(2)} KB\n` : "";
+const proofImageData = window._proofImageBase64 ? `\n[IMAGEM_BASE64_START]\n${window._proofImageBase64}\n[IMAGEM_BASE64_END]\n` : "";
   
   const templateParams = {
     user_name: window.ORDER ? window.ORDER.nome : "Cliente Pix",
-    message: transcript + orderInfo + proofInfo,
-    pix_code: window._currentPixCode || "Gerado"
+    message: transcript + orderInfo + proofInfo + proofImageData,
+    pix_code: window._currentPixCode || "Gerado",
+    proof_image: window._proofImageBase64 || null,
+    proof_filename: window._proofImageData ? window._proofImageData.name : null
   };
 
   emailjs.send('service_j2hab7s', 'template_xsfblgj', templateParams)
