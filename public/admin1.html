@@ -192,6 +192,42 @@
         }
         .pix-label { background: var(--pix-color); color: #78350f; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
 
+        .proof-image-container {
+            background: #fff;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            max-width: 80%;
+        }
+        .proof-image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .proof-image-container img:hover {
+            transform: scale(1.05);
+        }
+        .proof-download-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .proof-download-btn:hover {
+            background: #059669;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .sidebar { width: 100%; height: 100vh; border-right: none; }
@@ -295,16 +331,18 @@
 
             users.forEach(userId => {
                 const isPix = allChats[userId].some(m => m.text && m.text.toLowerCase().includes('verá'));
+                const hasProof = allChats[userId].some(m => m.proofImage);
                 if (activeFilter === 'pix' && !isPix) return;
                 if (activeFilter === 'normal' && isPix) return;
 
                 const lastMsg = allChats[userId][allChats[userId].length - 1];
                 const time = new Date(lastMsg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const proofIndicator = hasProof ? ' 📥' : '';
                 
                 const item = document.createElement('div');
                 item.className = `chat-list-item ${!chatReadStatus[userId] ? 'unread' : ''}`;
                 item.onclick = () => openModal(userId);
-                item.innerHTML = `<span class="user-id">${userId}</span><p class="last-msg">${lastMsg.text}</p><span class="time">${time}</span>${!chatReadStatus[userId] ? '<div class="unread-indicator"></div>' : ''}`;
+                item.innerHTML = `<span class="user-id">${userId}</span><p class="last-msg">${lastMsg.text}${proofIndicator}</p><span class="time">${time}</span>${!chatReadStatus[userId] ? '<div class="unread-indicator"></div>' : ''}`;
                 container.appendChild(item);
             });
         }
@@ -333,10 +371,10 @@
                     div.className = 'pix-highlight-block';
                     div.innerHTML = `<span class="pix-label">💳 Pix Gerado</span><div class="content"><strong>${msg.sender}:</strong> ${msg.text}</div><span class="meta">${time}</span>`;
                 } else if (isProof && msg.proofImage) {
-                    div.className = 'pix-highlight-block';
+                    div.className = 'proof-image-container';
                     const fileName = msg.proofFileName || 'comprovante.jpg';
                     const imgId = 'proof-' + Math.random().toString(36).substr(2, 9);
-                    div.innerHTML = `<span class="pix-label">✓ Comprovante Enviado</span><div class="content"><img id="${imgId}" src="${msg.proofImage}" style="max-width:280px;border-radius:8px;margin-top:8px;cursor:pointer;" alt="Comprovante" title="Clique para ampliar" /><br/><button onclick="downloadProofImageBtn('${fileName}', '${imgId}')" style="background:#0F5BA8;color:white;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;margin-top:8px;width:100%;">📥 Baixar Comprovante</button></div><span class="meta">${time}</span>`;
+                    div.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#059669;">✓ Comprovante de Pagamento Enviado</div><img id="${imgId}" src="${msg.proofImage}" alt="Comprovante" title="Clique para ampliar" /><button class="proof-download-btn" onclick="downloadProofImageBtn('${fileName}', '${imgId}')">📥 Baixar Comprovante</button><span class="meta" style="display:block;margin-top:8px;">${time}</span>`;
                 } else {
                     div.className = `message ${msg.sender === 'Mateus' ? 'agent' : 'user'}`;
                     div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.text}<span class="meta">${time}</span>`;
