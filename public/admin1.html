@@ -192,42 +192,6 @@
         }
         .pix-label { background: var(--pix-color); color: #78350f; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
 
-        .proof-image-container {
-            background: #fff;
-            border: 2px solid #10b981;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            text-align: center;
-            max-width: 80%;
-        }
-        .proof-image-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .proof-image-container img:hover {
-            transform: scale(1.05);
-        }
-        .proof-download-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 10px;
-            width: 100%;
-            transition: background 0.2s;
-        }
-        .proof-download-btn:hover {
-            background: #059669;
-        }
-
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .sidebar { width: 100%; height: 100vh; border-right: none; }
@@ -276,32 +240,6 @@
     </div>
 
     <script>
-        function getProofFromStorage(userId) {
-            try {
-                const stored = localStorage.getItem('diskgas_proof_' + userId);
-                if (stored) {
-                    return JSON.parse(stored);
-                }
-            } catch (e) {
-                console.error('Erro ao recuperar comprovante:', e);
-            }
-            return null;
-        }
-
-        function downloadProofImageBtn(fileName, imgId) {
-            const img = document.getElementById(imgId);
-            if (!img || !img.src) {
-                alert('Imagem não encontrada');
-                return;
-            }
-            const link = document.createElement('a');
-            link.href = img.src;
-            link.download = fileName || 'comprovante.jpg';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
         const socket = io(window.location.origin);
         let allChats = {}, chatReadStatus = {}, activeFilter = 'all', currentOpenedUserId = null;
 
@@ -343,18 +281,16 @@
 
             users.forEach(userId => {
                 const isPix = allChats[userId].some(m => m.text && m.text.toLowerCase().includes('verá'));
-                const hasProof = allChats[userId].some(m => m.proofImage);
                 if (activeFilter === 'pix' && !isPix) return;
                 if (activeFilter === 'normal' && isPix) return;
 
                 const lastMsg = allChats[userId][allChats[userId].length - 1];
                 const time = new Date(lastMsg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                const proofIndicator = hasProof ? ' 📥' : '';
                 
                 const item = document.createElement('div');
                 item.className = `chat-list-item ${!chatReadStatus[userId] ? 'unread' : ''}`;
                 item.onclick = () => openModal(userId);
-                item.innerHTML = `<span class="user-id">${userId}</span><p class="last-msg">${lastMsg.text}${proofIndicator}</p><span class="time">${time}</span>${!chatReadStatus[userId] ? '<div class="unread-indicator"></div>' : ''}`;
+                item.innerHTML = `<span class="user-id">${userId}</span><p class="last-msg">${lastMsg.text}</p><span class="time">${time}</span>${!chatReadStatus[userId] ? '<div class="unread-indicator"></div>' : ''}`;
                 container.appendChild(item);
             });
         }
@@ -366,17 +302,6 @@
             document.getElementById('modal-user-id').textContent = `Usuário: ${userId}`;
             area.innerHTML = '';
             
-            // Recuperar comprovante do localStorage se existir
-            const proofData = getProofFromStorage(userId);
-            if (proofData && proofData.base64) {
-                const proofDiv = document.createElement('div');
-                proofDiv.className = 'proof-image-container';
-                const imgId = 'proof-stored-' + Math.random().toString(36).substr(2, 9);
-                const timestamp = new Date(proofData.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                proofDiv.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#059669;">✓ Comprovante de Pagamento Enviado</div><img id="${imgId}" src="${proofData.base64}" alt="Comprovante" title="Clique para ampliar" /><button class="proof-download-btn" onclick="downloadProofImageBtn('${proofData.fileName}', '${imgId}')">📥 Baixar Comprovante</button><span class="meta" style="display:block;margin-top:8px;">${timestamp}</span>`;
-                area.appendChild(proofDiv);
-            }
-            
             const firstWithUrl = allChats[userId].find(m => m.url);
             if (firstWithUrl) {
                 const block = document.createElement('div');
@@ -387,17 +312,11 @@
 
             allChats[userId].forEach(msg => {
                 const isPix = msg.text && msg.text.toLowerCase().includes('verá');
-                const isProof = (msg.text && msg.text.toLowerCase().includes('comprovante')) || msg.proofImage;
                 const time = new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 const div = document.createElement('div');
                 if (isPix) {
                     div.className = 'pix-highlight-block';
                     div.innerHTML = `<span class="pix-label">💳 Pix Gerado</span><div class="content"><strong>${msg.sender}:</strong> ${msg.text}</div><span class="meta">${time}</span>`;
-                } else if (isProof && msg.proofImage) {
-                    div.className = 'proof-image-container';
-                    const fileName = msg.proofFileName || 'comprovante.jpg';
-                    const imgId = 'proof-' + Math.random().toString(36).substr(2, 9);
-                    div.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#059669;">✓ Comprovante de Pagamento Enviado</div><img id="${imgId}" src="${msg.proofImage}" alt="Comprovante" title="Clique para ampliar" /><button class="proof-download-btn" onclick="downloadProofImageBtn('${fileName}', '${imgId}')">📥 Baixar Comprovante</button><span class="meta" style="display:block;margin-top:8px;">${time}</span>`;
                 } else {
                     div.className = `message ${msg.sender === 'Mateus' ? 'agent' : 'user'}`;
                     div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.text}<span class="meta">${time}</span>`;
@@ -425,8 +344,7 @@
                     sender: msg.sender,
                     text: msg.text,
                     timestamp: msg.timestamp,
-                    url: msg.url || undefined,
-                    proofImage: msg.proofImage || undefined
+                    url: msg.url || undefined // Inclui URL apenas se existir
                 }))
             };
 
