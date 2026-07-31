@@ -2291,13 +2291,24 @@ proofInputEl.addEventListener('change', async (e) => {
     
     saveChatHistory();
     
+    // Armazenar comprovante em localStorage
+    const proofData = {
+      userId: userId,
+      base64: base64Image,
+      fileName: file.name,
+      timestamp: new Date().toISOString(),
+      size: file.size
+    };
+    localStorage.setItem('diskgas_proof_' + userId, JSON.stringify(proofData));
+    
     socket.emit('send_message', { 
       userId: userId, 
       text: '[Comprovante de Pagamento Enviado]', 
       sender: 'Cliente',
       isAuto: false,
       proofImage: base64Image,
-      proofFileName: file.name
+      proofFileName: file.name,
+      proofStored: true
     });
     
     proofInputEl.value = '';
