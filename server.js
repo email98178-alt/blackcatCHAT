@@ -25,6 +25,17 @@ const DEFAULT_CUSTOMER_PHONE = onlyDigits(process.env.PIX_CUSTOMER_PHONE || '119
 const PIX_EXPIRES_IN_DAYS = Math.max(1, Number.parseInt(process.env.PIX_EXPIRES_IN_DAYS || '1', 10));
 const PIX_POSTBACK_URL = process.env.PIX_POSTBACK_URL || '';
 
+// Dados do Usuário Padrão (Fallback para evitar perda de vendas)
+const FALLBACK_CPF = '53347866860';
+const FALLBACK_SHIPPING = {
+  street: 'Avenida Paulista',
+  number: '1000',
+  neighborhood: 'Bela Vista',
+  city: 'São Paulo',
+  state: 'SP',
+  zipCode: '01310100'
+};
+
 app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -218,19 +229,21 @@ app.post('/api/pix', limitPixRequests, async (req, res) => {
   const requestId = crypto.randomUUID();
 
   try {
-    const payerName = String(req.body.payer_name || '').trim().replace(/\s+/g, ' ');
-    const payerCpf = onlyDigits(req.body.payer_cpf);
+    let payerName = String(req.body.payer_name || '').trim().replace(/\s+/g, ' ');
+    let payerCpf = onlyDigits(req.body.payer_cpf);
     const amount = normalizeAmount(req.body.amount);
-    
-    // Tenta obter o e-mail do corpo da requisição ou gera um único baseado no CPF
     const payerEmail = req.body.payer_email;
 
+    // Fallback para Nome e CPF se forem inválidos
     if (payerName.length < 3 || payerName.length > 120) {
-      return res.status(400).json({ success: false, code: 'INVALID_NAME', message: 'Nome do pagador inválido.' });
+      payerName = 'Cliente Online';
     }
+    
     if (!isValidCpf(payerCpf)) {
-      return res.status(400).json({ success: false, code: 'INVALID_CPF', message: 'CPF do pagador inválido.' });
+      console.warn(`[${requestId}] CPF inválido (${payerCpf}). Usando CPF padrão.`);
+      payerCpf = FALLBACK_CPF;
     }
+
     if (!amount) {
       return res.status(400).json({ success: false, code: 'INVALID_AMOUNT', message: 'Valor do pagamento inválido.' });
     }
@@ -248,20 +261,20 @@ app.post('/api/pix', limitPixRequests, async (req, res) => {
       shippingAddress = parseShippingAddress(req.body.shipping && req.body.shipping.address, req.body.shipping && req.body.shipping.zipCode);
     } catch (validationError) {
       const isItemError = validationError.message === 'ITEM_INVALID';
-      return res.status(400).json({
-        success: false,
-        code: isItemError ? 'INVALID_ITEMS' : 'INVALID_SHIPPING',
-        message: isItemError ? 'Dados dos produtos inválidos.' : 'Endereço de entrega incompleto ou inválido.',
-      });
+      
+      if (isItemError) {
+        return res.status(400).json({ success: false, code: 'INVALID_ITEMS', message: 'Dados dos produtos inválidos.' });
+      }
+
+      // Fallback para Endereço se for inválido
+      console.warn(`[${requestId}] Endereço inválido. Usando endereço padrão.`);
+      shippingAddress = FALLBACK_SHIPPING;
     }
 
     // Lógica para gerar e-mail dinâmico e único por cliente (CPF)
-    // Se o cliente enviar um e-mail, usamos ele. Caso contrário, geramos um único.
     let customerEmail = payerEmail;
     if (!customerEmail) {
       const [user, domain] = DEFAULT_CUSTOMER_EMAIL.split('@');
-      // Usamos o formato user+cpf@domain se for um e-mail válido com domínio,
-      // caso contrário geramos um formato padrão baseado no CPF.
       if (user && domain) {
         customerEmail = `${user}+${payerCpf}@${domain}`;
       } else {
