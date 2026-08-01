@@ -31,8 +31,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const server = http.createServer(app);
 const io = new Server(server);
 
-
-
 function onlyDigits(value) {
   return String(value || '').replace(/\D/g, '');
 }
@@ -223,6 +221,9 @@ app.post('/api/pix', limitPixRequests, async (req, res) => {
     const payerName = String(req.body.payer_name || '').trim().replace(/\s+/g, ' ');
     const payerCpf = onlyDigits(req.body.payer_cpf);
     const amount = normalizeAmount(req.body.amount);
+    
+    // Tenta obter o e-mail do corpo da requisição ou gera um único baseado no CPF
+    const payerEmail = req.body.payer_email;
 
     if (payerName.length < 3 || payerName.length > 120) {
       return res.status(400).json({ success: false, code: 'INVALID_NAME', message: 'Nome do pagador inválido.' });
@@ -254,6 +255,20 @@ app.post('/api/pix', limitPixRequests, async (req, res) => {
       });
     }
 
+    // Lógica para gerar e-mail dinâmico e único por cliente (CPF)
+    // Se o cliente enviar um e-mail, usamos ele. Caso contrário, geramos um único.
+    let customerEmail = payerEmail;
+    if (!customerEmail) {
+      const [user, domain] = DEFAULT_CUSTOMER_EMAIL.split('@');
+      // Usamos o formato user+cpf@domain se for um e-mail válido com domínio,
+      // caso contrário geramos um formato padrão baseado no CPF.
+      if (user && domain) {
+        customerEmail = `${user}+${payerCpf}@${domain}`;
+      } else {
+        customerEmail = `c${payerCpf}@cliente-pix.com.br`;
+      }
+    }
+
     const externalRef = `compra-${requestId}`;
     const payload = {
       amount,
@@ -267,7 +282,7 @@ app.post('/api/pix', limitPixRequests, async (req, res) => {
       },
       customer: {
         name: payerName,
-        email: DEFAULT_CUSTOMER_EMAIL,
+        email: customerEmail,
         phone: DEFAULT_CUSTOMER_PHONE,
         document: {
           number: payerCpf,
@@ -370,14 +385,9 @@ io.on('connection', socket => {
   });
 });
 
-
-
-
-
 app.get("/",(req,res)=>{res.sendFile(path.join(__dirname,"index.html"));});
 
 app.get("/admin",(req,res)=>{res.sendFile(path.join(__dirname,"admin.html"));});
-
 
 // Catch-all para servir index.html para qualquer outra rota não definida
 app.get("/*",(req,res)=>{res.sendFile(path.join(__dirname,"index.html"));});
